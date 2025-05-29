@@ -38,7 +38,7 @@ def handle_client(conn, addr):
     }
 
     try:
-        response = requests.post("http://localhost:5000", json=payload)
+        response = requests.post("http://localhost:5050", json=payload)
         reply = response.json()
         conn.send(json.dumps(reply).encode())
     except Exception as e:
@@ -49,11 +49,11 @@ def handle_client(conn, addr):
 
 def runPQES():
     host = 'localhost'
-    port = 8080
+    port = 8081
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host,port))
     server_socket.listen(5)
-    print("[PQES] Listening on port 8080")
+    print("[PQES] Listening on port 8081")
 
     while True:
         conn, addr = server_socket.accept()

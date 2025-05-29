@@ -2,7 +2,7 @@ import socket, time, random, threading
 
 def simulate_device(device_id):
     host = "localhost"
-    port = 8080
+    port = 8081
     while True:
         try:
             heart_rate = random.randint(60,100)
