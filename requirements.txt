@@ -1,0 +1,11 @@
+certifi==2025.4.26
+cffi==1.17.1
+charset-normalizer==3.4.2
+idna==3.10
+liboqs-python @ file:///home/foroogh-ubuntu/Desktop/JCR%20Paper/liboqs-python
+psutil==7.0.0
+pycparser==2.22
+requests==2.32.3
+urllib3==2.4.0
+wheel==0.45.1
+wolfssl==5.7.4.post0
