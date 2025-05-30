@@ -1,4 +1,4 @@
-import socket, time, random, threading
+import socket, time, random, threading, json
 
 def simulate_device(device_id):
     host = "localhost"
@@ -14,8 +14,8 @@ def simulate_device(device_id):
             sock.send(data.encode())
             response = sock.recv(2048).decode()
             sock.close()
-
-            print(f"[IOT-{device_id}] Response: {response}")
+            
+            print(f"[IOT-{device_id}] status: {response[12:21]}")
         except Exception as e:
             print(f"[IOT-{device_id}] Error: {e}")
         time.sleep(2)
