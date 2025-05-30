@@ -1,6 +1,6 @@
 import socket, threading, requests, json
 from oqs import Signature, KeyEncapsulation
-import psutil
+import psutil, time, select, os
 
 translation_table={}
 
@@ -25,17 +25,19 @@ def handle_client(conn, addr):
     data = conn.recv(2048).decode()
     print(f"[PQES] Received from {ip}: {data}")
 
+    start_time = time.perf_counter()
+
     kem = KeyEncapsulation("Kyber512")
     ciphertext, shared_secret = kem.encap_secret(kem_pk)
 
     signature = sig.sign(data.encode())
 
     payload = {
-        "cert":cert,
-        "ciphertext":ciphertext.hex(),
-        # "signature":signature.hex(),
-        "data":data
-    }
+        "cert": cert,
+        "ciphertext": ciphertext.hex(),
+        "data": data,
+        "signature": signature.hex()   
+        }
 
     try:
         response = requests.post("http://localhost:5050", json=payload)
@@ -43,9 +45,11 @@ def handle_client(conn, addr):
         conn.send(json.dumps(reply).encode())
     except Exception as e:
         conn.send(f"ERROR: {e}".encode())
+    conn.close()
 
-        conn.close()
-        print(f"[PQES] Send HTTP -> CPU: {psutil.cpu_percent()}% | RAM: {psutil.virtual_memory().used / 1024 / 1024:.2f} MB")
+    end_time = time.perf_counter()
+    elapsed = (end_time - start_time) * 1000
+    print(f"[PQES] ↔ Latency: {elapsed:.2f} ms | Payload: {len(json.dumps(payload))} bytes")
 
 def runPQES():
     host = 'localhost'
@@ -56,11 +60,10 @@ def runPQES():
     print("[PQES] Listening on port 8081")
 
     while True:
-        conn, addr = server_socket.accept()
-        threading.Thread(target=handle_client, args=(conn, addr)).start()
+        readable, _, _ = select.select([server_socket], [], [], 1)
+        if readable:
+            conn, addr = server_socket.accept()
+            threading.Thread(target=handle_client, args=(conn, addr)).start()
 
 if __name__ == "__main__":
     runPQES()
-
-
-
