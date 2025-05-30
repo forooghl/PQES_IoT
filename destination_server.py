@@ -5,7 +5,9 @@ class PQHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_len = int(self.headers['Content-Length'])
         body = self.rfile.read(content_len).decode()
-        print(f"[DEST] Received Encrypted PQ Payload:\n{body}")
+        
+        body_json = json.loads(body)
+        print(f"[DEST] Received Encrypted PQ Payload:\ncert: {body_json["cert"]}\ncipherText: {body_json["ciphertext"][0:13]}...")
     
 
         response={"status":"Processed","echo":body}
