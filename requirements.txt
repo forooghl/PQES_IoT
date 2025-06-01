@@ -1,6 +1,7 @@
 certifi==2025.4.26
 cffi==1.17.1
 charset-normalizer==3.4.2
+cryptography==45.0.3
 idna==3.10
 liboqs-python @ file:///home/foroogh-ubuntu/Desktop/JCR%20Paper/liboqs-python
 psutil==7.0.0
