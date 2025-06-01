@@ -1,26 +1,26 @@
 import socket, threading, requests, json
 from oqs import Signature, KeyEncapsulation
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import psutil, time, select, os
 
 translation_table={}
+with open("kyber_public_key.bin", "rb") as f:
+    dest_public_key = f.read()
 
 def generate_pq_certificate(ip):
-    kem = KeyEncapsulation("Kyber512")
-    kem_pk = kem.generate_keypair()
-
     sig = Signature("Dilithium2")
     sig_pk = sig.generate_keypair()
     cert = f"PQ-CERT-{ip[:5]}-{sig_pk[:8].hex()}"
-    return cert, sig_pk, kem_pk, sig
+    return cert, sig_pk, sig
 
 def handle_client(conn, addr):
     ip = addr[0]
     if ip not in translation_table:
-        cert, sig_pk, kem_pk, sig = generate_pq_certificate(ip)
-        translation_table[ip] = (cert, sig_pk, kem_pk, sig)
+        cert, sig_pk, sig = generate_pq_certificate(ip)
+        translation_table[ip] = (cert, sig_pk, sig)
         print(f"[PQES] Generated PQ Cert for {ip}: {cert}")
     else:
-        cert, sig_pk, kem_pk, sig = translation_table[ip]
+        cert, sig_pk, sig = translation_table[ip]
 
     data = conn.recv(2048).decode()
     print(f"[PQES] Received from {ip}: {data}")
@@ -28,14 +28,18 @@ def handle_client(conn, addr):
     start_time = time.perf_counter()
 
     kem = KeyEncapsulation("Kyber512")
-    ciphertext, shared_secret = kem.encap_secret(kem_pk)
-
+    ciphertext, shared_secret = kem.encap_secret(dest_public_key)
+    key = shared_secret[:32]  # AES-256 key
+    nonce = os.urandom(12)
+    aesgcm = AESGCM(key)
+    encrypted_data = aesgcm.encrypt(nonce, data.encode(), None)
     signature = sig.sign(data.encode())
 
     payload = {
         "cert": cert,
         "ciphertext": ciphertext.hex(),
-        "data": data,
+        "nonce": nonce.hex(),
+        "data_enc": encrypted_data.hex(),
         "signature": signature.hex()   
         }
 
@@ -45,6 +49,7 @@ def handle_client(conn, addr):
         conn.send(json.dumps(reply).encode())
     except Exception as e:
         conn.send(f"ERROR: {e}".encode())
+
     conn.close()
 
     end_time = time.perf_counter()
