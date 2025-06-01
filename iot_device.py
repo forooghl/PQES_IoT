@@ -15,7 +15,7 @@ def simulate_device(device_id):
             response = sock.recv(2048).decode()
             sock.close()
             
-            print(f"[IOT-{device_id}] status: {response[12:21]}")
+            print(f"[IOT-{device_id}] status: {response}")
         except Exception as e:
             print(f"[IOT-{device_id}] Error: {e}")
         time.sleep(2)
