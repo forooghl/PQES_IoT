@@ -11,7 +11,7 @@ This project simulates the **Post-Quantum Edge Server (PQES)** architecture prop
 - **Destination server** (Cloud/backend server).  
 
 🔹 **Key Features:**  
-✅ Simulates **Dilithium** (for signatures) and **Kyber** (for encryption) using `liboqs-python`.  
+✅ Simulates **Dilithium** (for signatures) and **Kyber** (for key encapsulation mechanism) using `liboqs-python`.  
 ✅ Measures **CPU/RAM usage** (like the original paper).  
 ✅ Works on **Windows/Linux** without physical hardware.  
 
@@ -63,13 +63,13 @@ This project simulates the **Post-Quantum Edge Server (PQES)** architecture prop
 | **Metric**          | **Paper (Hardware)** | **This Simulation** |  
 |----------------------|----------------------|---------------------|  
 | **Max RAM (PQES)**   | 13.4 MB              | ~13 MB              |  
-| **Max CPU (PQES)**   | 1.75%                | ~1%                 |  
+| **Max CPU (PQES)**   | 1.75%                | ~2%                 |  
 | **Latency**          | <1 ms                | <8 ms (simulated)  |  
 
 ---
 
 ## **🔧 Customization**  
-1. **Change PQC Algorithms** (in `pqes_server.py`):  
+1. **Change PQC Algorithms** (in `pqes_server.py` and `destination_server.py`):  
    ```python
    # Replace "Dilithium2" with other options (e.g., "Falcon-512")
    sig = Signature("Dilithium2")  
